@@ -1,0 +1,21 @@
+{
+  "name": "signaling",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.24.1",
+    "@babel/core": "^7.24.4",
+    "@babel/node": "^7.23.9",
+    "@babel/preset-env": "^7.24.4",
+    "nodemon": "^2.0.12"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pug": "^3.0.2",
+    "socket.io": "^4.7.5"
+  }
+}
