@@ -27,6 +27,27 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("senderOffer", async data => {
+    try {
+        socketToRoom[data.senderSocketID] = data.roomID;
+        let pc = createReceiverPeerConnection(
+            data.senderSocketID,
+            socket,
+            data.roomID
+        );
+        await pc.setRemoteDescription(data.sdp);
+        let sdp = await pc.createAnswer({
+            offerToReceiveAudio: true,
+            offerToReceiveVideo: true,
+        });
+        await pc.setLocalDescription(sdp);
+        socket.join(data.roomID);
+        io.to(data.senderSocketID).emit("getSenderAnswer", { sdp });
+    } catch (error) {
+        console.log(error);
+    }
+  });
+
 })
 
 const handleListen = () => console.log('Listen one http://localhost:3000,')
