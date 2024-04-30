@@ -190,7 +190,7 @@ io.on("connection", (socket) => {
       socket.join(data.roomID);
       io.to(data.senderSocketID).emit("getSenderAnswer", { sdp });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   });
 
@@ -199,7 +199,7 @@ io.on("connection", (socket) => {
       let pc = receiverPCs[data.senderSocketID];
       await pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   });
 
@@ -222,20 +222,18 @@ io.on("connection", (socket) => {
         sdp,
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   });
 
   socket.on("receiverCandidate", async (data) => {
     try {
-      const senderPC = senderPCs[data.senderSocketID].filter(
-        (sPC) => sPC.id === data.receiverSocketID
-      )[0];
+      const senderPC = senderPCs[data.senderSocketID].filter((sPC) => sPC.id === data.receiverSocketID)[0];
       await senderPC.pc.addIceCandidate(
         new wrtc.RTCIceCandidate(data.candidate)
       );
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   });
 
@@ -249,7 +247,7 @@ io.on("connection", (socket) => {
 
       socket.broadcast.to(roomID).emit("userExit", { id: socket.id });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   });
 });
