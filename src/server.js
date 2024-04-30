@@ -31,7 +31,6 @@ io.on("connection", (socket) => {
     try {
       room.socketToRoom[data.senderSocketID] = data.roomID;
       let pc = peer.createReceiverPeerConnection(data.senderSocketID, socket, data.roomID);
-      console.log(pc)
       await pc.setRemoteDescription(data.sdp);
       let sdp = await pc.createAnswer({
         offerToReceiveAudio: true,
@@ -99,5 +98,5 @@ io.on("connection", (socket) => {
   });
 });
 
-const handleListen = () => console.log('Listen one' + config.SOCKET_SERVER_URL)
+const handleListen = () => console.log('Listen one ' + config.SOCKET_SERVER_URL)
 httpServer.listen(config.SERVER_PORT, handleListen);

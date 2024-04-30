@@ -1,5 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 module.exports = {
-  SERVER_PORT: 8080,
+  SERVER_PORT: process.env.SERVER_PORT,
   PC_CONFIG: {
     iceServers: [
     // {
@@ -8,14 +11,13 @@ module.exports = {
     //   'username': '[USERNAME]'
     // },
       {
-          urls: "stun:stun.l.google.com:19302",
+          urls: process.env.STUN_URL,
       }]
   },
-  SOCKET_SERVER_URL: "http://localhost:8080",
-  CLIENT_URL: "http://localhost:3000",
+  SOCKET_SERVER_URL: process.env.SOCKET_SERVER_URL,
   CORS_CONFIG: {
     cors: {
-        origin: ["http://localhost:3000"],  
+        origin: [process.env.CLIENT_URL],
         methods: ["GET", "POST"],
         transports: ['websocket', 'polling'],
         credentials: true                 
