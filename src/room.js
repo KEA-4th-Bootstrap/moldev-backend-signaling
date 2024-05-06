@@ -1,14 +1,16 @@
-class RoomManager {
-  constructor() {
+export class RoomManager {
+  constructor(redis) {
     this.users = {};
     this.socketToRoom = {};
+    this.redis = redis;
   }
 
-  joinFirstSocketRoomWithMediaStream(roomId, socketId, stream) {
+  joinFirstSocketRoomWithMediaStream(roomId, socketId, stream, roomSocketId) {
     this.users[roomId] = [{
-        id: socketId,
-        stream: stream,
-      }];
+      id: socketId,
+      stream: stream,
+    }];
+    this.redis.setAsync(`room:${roomId}`, roomSocketId);
   }
 
   joinSocketRoomWithMediaStream(roomId, socketId, stream) {
@@ -22,29 +24,28 @@ class RoomManager {
     return this.users[roomId].filter((user) => user.id === senderSocketId)[0];
   }
 
-  getOtherUsersInRoom (socketID, roomID) {
+  getOtherUsersInRoom (socketId, roomId) {
     let allUsers = [];
+
+    if (!this.users[roomId]) return allUsers;
   
-    if (!this.users[roomID]) return allUsers;
-  
-    allUsers = this.users[roomID]
-      .filter((user) => user.id !== socketID)
+    allUsers = this.users[roomId]
+      .filter((user) => user.id !== socketId)
       .map((otherUser) => ({ id: otherUser.id }));
   
     return allUsers;
   };
 
-  deleteUser (socketID, roomID) {
-    if (!this.users[roomID]) return;
+  deleteUser (socketId, roomId) {
+    if (!this.users[roomId]) return;
 
-    this.users[roomID] = this.users[roomID].filter((user) => user.id !== socketID);
+    this.users[roomId] = this.users[roomId].filter((user) => user.id !== socketId);
 
-    if (this.users[roomID].length === 0) {
-      delete this.users[roomID];
+    if (this.users[roomId].length === 0) {
+      delete this.users[roomId];
+      this.redis.delAsync(`room:${roomId}`);
     } else {
-      delete this.socketToRoom[socketID];
+      delete this.socketToRoom[socketId];
     }
   };
 }
-
-module.exports = RoomManager;
