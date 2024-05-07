@@ -48,6 +48,12 @@ io.on("connection", async (socket) => {
     pub.publish((hostId === null ? socket.id : hostId) + "-receiverCandidate", JSON.stringify(data));
   });
 
+  socket.on("quitRoom", async (data) => {
+    const hostId = await redis.getAsync(`room:${data.roomId}`);
+    console.log("quitRoom", data.roomId);
+    pub.publish((hostId === null ? socket.id : hostId) + "-disconnect", JSON.stringify(data));
+  })
+
   socket.on("disconnect", async () => {
     pub.publish(socket.id + "-disconnect", JSON.stringify({}));
   });
@@ -58,7 +64,7 @@ io.on("connection", async (socket) => {
   await sub.subscribeSenderCandidate(socket.id);
   await sub.subscribeReceiverOffer(socket.id);
   await sub.subscribeReceiverCandidate(socket.id);
-  await sub.subscribeDisconnect(socket.id, socket);
+  await sub.subscribeDisconnect(socket.id);
 });
 
 const handleListen = () => console.log('Listen one' + config.SOCKET_SERVER_URL)

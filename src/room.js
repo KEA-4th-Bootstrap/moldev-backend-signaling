@@ -37,10 +37,11 @@ export class RoomManager {
   };
 
   deleteUser (socketId, roomId) {
+    console.log("room.js", this.users[roomId], roomId)
     if (!this.users[roomId]) return;
 
     this.users[roomId] = this.users[roomId].filter((user) => user.id !== socketId);
-
+    console.log("room.js", this.users)
     if (this.users[roomId].length === 0) {
       delete this.users[roomId];
       this.redis.delAsync(`room:${roomId}`);
