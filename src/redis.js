@@ -177,7 +177,7 @@ export class Subscribe extends Redis {
     });
   }
 
-  async subscribeReceiverOffer(channel, socket) {
+  async subscribeReceiverOffer(channel) {
     await this.redisClient.subscribe(channel + "-receiverOffer", async (message) => {
       const data = JSON.parse(message);
       const receiverSocketId = data.receiverSocketId;

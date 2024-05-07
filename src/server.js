@@ -56,7 +56,7 @@ io.on("connection", async (socket) => {
   await sub.subscribeJoinRoom(socket.id);
   await sub.subscribeSenderOffer(socket.id, socket);
   await sub.subscribeSenderCandidate(socket.id);
-  await sub.subscribeReceiverOffer(socket.id, socket);
+  await sub.subscribeReceiverOffer(socket.id);
   await sub.subscribeReceiverCandidate(socket.id);
   await sub.subscribeDisconnect(socket.id, socket);
 });
