@@ -1,3 +1,1 @@
-module.exports = {
-  isIncluded: (array, id) => array.some((item) => item.id === id)
-}
+export const isIncluded = (array, id) => array.some((item) => item.id === id);
