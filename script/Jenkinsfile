@@ -1,0 +1,98 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Repository') {
+            steps {
+                git branch: 'dev', url: "https://github.com/KEA-4th-Bootstrap/moldev-backend-signaling"
+            }
+        }
+
+        stage('Build') {
+            steps {
+                withCredentials([file(credentialsId: 'signaling-application', variable: 'application')]) {
+                    sh """
+                            mkdir -p ./src/main/resources
+                            cp -f ${application} ./src/main/resources/application.yml
+                            ls -l src/main/resources/
+                            cat src/main/resources/application.yml
+                            ./gradlew clean build
+                    """
+                }
+            }
+            post {
+                  always {
+                         jiraSendBuildInfo site: 'kea4bootstrap.atlassian.net'
+                  }
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-jenkins-token', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'docker-hub-name', variable: 'DOCKER_NAME'),
+                    string(credentialsId: 'docker-file-signaling', variable: 'DOCKER_FILE')
+                ]) {
+                    // Docker 이미지에 Jenkins 빌드 번호를 태그로 추가
+                    sh "docker build -t ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} ."
+                }
+            }
+
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'docker-hub-name', variable: 'DOCKER_NAME'),
+                    string(credentialsId: 'docker-file-signaling', variable: 'DOCKER_FILE')
+                ]) {
+                    // Docker 이미지를 빌드 번호 태그와 함께 푸시
+                    sh "docker push ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number}"
+                }
+            }
+        }
+
+        stage("Clone Manifest Git Repository") {
+            steps {
+                git(
+                    url: 'https://github.com/KEA-4th-Bootstrap/moldev-kubernetes-manifest',
+                    branch: "main",
+                    changelog: true,
+                    poll: true
+                )
+            }
+        }
+
+        stage("Update Manifest version changes") {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'docker-hub-name', variable: 'DOCKER_NAME'),
+                    string(credentialsId: 'docker-file-signaling', variable: 'DOCKER_FILE')
+                ]) {
+                    sh """
+                        cd signaling
+                        sed -i 's/${DOCKER_NAME}\\/${DOCKER_FILE}:.*\$/${DOCKER_NAME}\\/${DOCKER_FILE}:${currentBuild.number}/g' deployment.yaml
+                        git add deployment.yaml
+                        git commit -m '[UPDATE] manifest ${currentBuild.number} image versioning'
+                    """
+                }
+            }
+        }
+
+        stage("Push to Git Repository") {
+            steps {
+                withCredentials([gitUsernamePassword(credentialsId: 'git-jenkins-manifest', gitToolName: 'Default')]) {
+                    sh "git push -u origin main"
+                }
+            }
+        }
+    }
+}
