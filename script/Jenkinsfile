@@ -41,11 +41,9 @@ pipeline {
                     string(credentialsId: 'docker-hub-name', variable: 'DOCKER_NAME'),
                     string(credentialsId: 'docker-file-signaling', variable: 'DOCKER_FILE')
                 ]) {
-                    // Docker 이미지에 Jenkins 빌드 번호를 태그로 추가
                     sh "docker build -t ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} ."
                 }
             }
-
         }
 
         stage('Push Docker Image') {
@@ -54,7 +52,6 @@ pipeline {
                     string(credentialsId: 'docker-hub-name', variable: 'DOCKER_NAME'),
                     string(credentialsId: 'docker-file-signaling', variable: 'DOCKER_FILE')
                 ]) {
-                    // Docker 이미지를 빌드 번호 태그와 함께 푸시
                     sh "docker push ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number}"
                 }
             }
