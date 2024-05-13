@@ -4,7 +4,26 @@ pipeline {
     stages {
         stage('Repository') {
             steps {
-                git branch: 'main', url: "https://github.com/KEA-4th-Bootstrap/moldev-backend-signaling"
+                git branch: 'dev', url: "https://github.com/KEA-4th-Bootstrap/moldev-backend-signaling"
+            }
+        }
+
+        stage('Build') {
+            steps {
+                withCredentials([file(credentialsId: 'signaling-application', variable: 'application')]) {
+                    sh """
+                            mkdir -p ./src/main/resources
+                            cp -f ${application} ./src/main/resources/application.yml
+                            ls -l src/main/resources/
+                            cat src/main/resources/application.yml
+                            ./gradlew clean build
+                    """
+                }
+            }
+            post {
+                  always {
+                         jiraSendBuildInfo site: 'kea4bootstrap.atlassian.net'
+                  }
             }
         }
 
