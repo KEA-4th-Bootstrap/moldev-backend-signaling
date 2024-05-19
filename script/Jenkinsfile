@@ -8,6 +8,22 @@ pipeline {
             }
         }
 
+        stage('Build') {
+            steps {
+                withCredentials([file(credentialsId: 'signaling-env', variable: 'signaling-env')]) {
+                    sh """
+                            cp -f ${signaling-env} ./.env
+                            cat .env
+                    """
+                }
+            }
+            post {
+                  always {
+                         jiraSendBuildInfo site: 'kea4bootstrap.atlassian.net'
+                  }
+            }
+        }
+
         stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'kakao-jenkins-token', passwordVariable: 'PASSWORD_KEY', usernameVariable: 'USER_KEY')]) {
@@ -23,12 +39,8 @@ pipeline {
                     string(credentialsId: 'docker-file-signaling', variable: 'DOCKER_FILE'),
                     file(credentialsId: 'signaling-env', variable: 'signaling-env')
                 ]) {
-                    sh """
-                            cp -f ${signaling-env} ./.env
-                            cat ${signaling-env}
-                            docker build -t ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} .
-                            docker tag ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} gcu-bootstrap-dev.kr-central-2.kcr.dev/moldev-repository/${DOCKER_FILE}:${currentBuild.number}
-                    """
+                    sh "docker build -t ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} . "
+                    sh "docker tag ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} gcu-bootstrap-dev.kr-central-2.kcr.dev/moldev-repository/${DOCKER_FILE}:${currentBuild.number}"
                 }
             }
 
