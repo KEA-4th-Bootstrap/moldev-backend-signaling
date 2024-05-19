@@ -8,29 +8,10 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                withCredentials([file(credentialsId: 'signaling-application', variable: 'application')]) {
-                    sh """
-                            mkdir -p ./src/main/resources
-                            cp -f ${application} ./src/main/resources/application.yml
-                            ls -l src/main/resources/
-                            cat src/main/resources/application.yml
-                            ./gradlew clean build
-                    """
-                }
-            }
-            post {
-                  always {
-                         jiraSendBuildInfo site: 'kea4bootstrap.atlassian.net'
-                  }
-            }
-        }
-
         stage('Docker Login') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-jenkins-token', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                withCredentials([usernamePassword(credentialsId: 'kakao-jenkins-token', passwordVariable: 'PASSWORD_KEY', usernameVariable: 'USER_KEY')]) {
+                    sh "docker login gcu-bootstrap-dev.kr-central-2.kcr.dev --username ${USER_KEY} --password ${PASSWORD_KEY}"
                 }
             }
         }
@@ -42,17 +23,18 @@ pipeline {
                     string(credentialsId: 'docker-file-signaling', variable: 'DOCKER_FILE')
                 ]) {
                     sh "docker build -t ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} ."
+                    sh "docker tag ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} gcu-bootstrap-dev.kr-central-2.kcr.dev/moldev-repository/${DOCKER_FILE}:${currentBuild.number}"
                 }
             }
+
         }
 
         stage('Push Docker Image') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'docker-hub-name', variable: 'DOCKER_NAME'),
                     string(credentialsId: 'docker-file-signaling', variable: 'DOCKER_FILE')
                 ]) {
-                    sh "docker push ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number}"
+                    sh "docker push gcu-bootstrap-dev.kr-central-2.kcr.dev/moldev-repository/${DOCKER_FILE}:${currentBuild.number}"
                 }
             }
         }
@@ -72,11 +54,11 @@ pipeline {
             steps {
                 withCredentials([
                     string(credentialsId: 'docker-hub-name', variable: 'DOCKER_NAME'),
-                    string(credentialsId: 'docker-file-signaling', variable: 'DOCKER_FILE')
+                    string(credentialsId: 'docker-file-api-composer', variable: 'DOCKER_FILE')
                 ]) {
                     sh """
                         cd signaling
-                        sed -i 's/${DOCKER_NAME}\\/${DOCKER_FILE}:.*\$/${DOCKER_NAME}\\/${DOCKER_FILE}:${currentBuild.number}/g' deployment.yaml
+                        sed -i 's|gcu-bootstrap-dev.kr-central-2.kcr.dev/moldev-repository/.*|gcu-bootstrap-dev.kr-central-2.kcr.dev/moldev-repository/${DOCKER_FILE}:${currentBuild.number}|' deployment.yaml
                         git add deployment.yaml
                         git commit -m '[UPDATE] manifest ${currentBuild.number} image versioning'
                     """
