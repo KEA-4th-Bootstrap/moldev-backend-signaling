@@ -20,10 +20,14 @@ pipeline {
             steps {
                 withCredentials([
                     string(credentialsId: 'docker-hub-name', variable: 'DOCKER_NAME'),
-                    string(credentialsId: 'docker-file-signaling', variable: 'DOCKER_FILE')
+                    string(credentialsId: 'docker-file-signaling', variable: 'DOCKER_FILE'),
+                    file(credentialsId: 'signaling-env', variable: 'signaling-env')
                 ]) {
-                    sh "docker build -t ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} ."
-                    sh "docker tag ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} gcu-bootstrap-dev.kr-central-2.kcr.dev/moldev-repository/${DOCKER_FILE}:${currentBuild.number}"
+                    sh """
+                        cp -f ${signaling-env} ./.env
+                        docker build -t ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} .
+                        docker tag ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} gcu-bootstrap-dev.kr-central-2.kcr.dev/moldev-repository/${DOCKER_FILE}:${currentBuild.number}
+                    """
                 }
             }
 
