@@ -25,6 +25,7 @@ pipeline {
                 ]) {
                     sh """
                         cp -f ${signaling-env} ./.env
+                        cat ./.env
                         docker build -t ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} .
                         docker tag ${DOCKER_NAME}/${DOCKER_FILE}:${currentBuild.number} gcu-bootstrap-dev.kr-central-2.kcr.dev/moldev-repository/${DOCKER_FILE}:${currentBuild.number}
                     """
