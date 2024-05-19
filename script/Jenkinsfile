@@ -12,7 +12,7 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'signaling-env', variable: 'signaling-env')]) {
                     sh """
-                            cp -f ${signaling-env} ./.env
+                            cp -f ${signaling-env} .env
                             cat .env
                     """
                 }
