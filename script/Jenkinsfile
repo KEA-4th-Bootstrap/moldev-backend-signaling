@@ -54,7 +54,7 @@ pipeline {
             steps {
                 withCredentials([
                     string(credentialsId: 'docker-hub-name', variable: 'DOCKER_NAME'),
-                    string(credentialsId: 'docker-file-api-composer', variable: 'DOCKER_FILE')
+                    string(credentialsId: 'docker-file-signaling', variable: 'DOCKER_FILE')
                 ]) {
                     sh """
                         cd signaling
