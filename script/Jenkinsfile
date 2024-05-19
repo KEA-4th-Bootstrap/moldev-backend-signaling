@@ -10,9 +10,9 @@ pipeline {
 
         stage('Build') {
             steps {
-                withCredentials([file(credentialsId: 'signaling-env', variable: 'signaling-env')]) {
+                withCredentials([file(credentialsId: 'signaling-env', variable: 'signaling')]) {
                     sh """
-                            cp -f ${signaling-env} .env
+                            cp -f ${signaling} .env
                             cat .env
                     """
                 }
