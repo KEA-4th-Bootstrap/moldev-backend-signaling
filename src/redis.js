@@ -248,8 +248,11 @@ export class Subscribe extends Redis {
 
         if (roomId === null) return;
   
+        console.log("1")
         this.room.deleteUser(channel, roomId);
+        console.log("2")
         this.peer.closeReceiverPC(channel);
+        console.log("3")
         this.peer.closeSenderPCs(channel);
 
         if (room.users[roomId] === undefined) return;
