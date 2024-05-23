@@ -1,4 +1,4 @@
-export class RoomManager {
+export default class RoomManager {
   constructor(redis) {
     this.users = {};
     this.socketToRoom = {};

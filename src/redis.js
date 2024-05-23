@@ -1,5 +1,5 @@
 import PeerConnectionManager from './peer'
-import { RoomManager } from './room'
+import RoomManager from './room'
 import { createClient } from 'redis';
 import config from './config'
 import { isIncluded } from './utils'
