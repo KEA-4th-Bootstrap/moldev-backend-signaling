@@ -8,16 +8,11 @@ module.exports = {
       {
           urls: process.env.STUN_URL,
       },
-      // {
-      //   urls: process.env.TURN_URL + "?transport=udp",
-      //   username: process.env.TURN_USERNAME,
-      //   credential: process.env.TURN_CREDETIAL,
-      // },
-      // {
-      //   urls: process.env.TURN_URL + "?transport=udp",
-      //   username: process.env.TURN_USERNAME,
-      //   credential: process.env.TURN_CREDETIAL,
-      // },
+      {
+        urls: "turn:43.203.19.5:3478?transport=udp",
+        username: process.env.TURN_USERNAME,
+        credential: process.env.TURN_CREDETIAL,
+      },
     ]
   },
   SOCKET_SERVER_URL: process.env.SOCKET_SERVER_URL,
