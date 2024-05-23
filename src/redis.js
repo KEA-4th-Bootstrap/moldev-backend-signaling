@@ -234,6 +234,7 @@ export class Subscribe extends Redis {
 
         console.log("remote onicecandidate start");
         senderPC.onicecandidate = async (e) => {
+          console.log("remote onicecandidate ing");
           await this.sendDataCallback(receiverSocketId, {
             id: senderSocketId,
             candidate: e.candidate
