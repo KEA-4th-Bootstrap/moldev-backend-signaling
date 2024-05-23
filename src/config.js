@@ -5,11 +5,16 @@ module.exports = {
   SERVER_PORT: process.env.SERVER_PORT,
   PC_CONFIG: {
     iceServers: [
-      // {
-      //     urls: process.env.STUN_URL,
-      // },
       {
-        urls: process.env.TURN_URL,
+          urls: process.env.STUN_URL,
+      },
+      {
+        urls: process.env.TURN_URL + "?transport=udp",
+        username: process.env.TURN_USERNAME,
+        credential: process.env.TURN_CREDETIAL,
+      },
+      {
+        urls: process.env.TURN_URL + "?transport=udp",
         username: process.env.TURN_USERNAME,
         credential: process.env.TURN_CREDETIAL,
       },
