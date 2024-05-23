@@ -9,7 +9,7 @@ module.exports = {
           urls: process.env.STUN_URL,
       },
       {
-        urls: "turn:43.203.19.5:3478",
+        urls: "turn:43.203.19.5:3478?transport=udp",
         username: process.env.TURN_USERNAME,
         credential: process.env.TURN_CREDETIAL,
       },
