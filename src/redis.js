@@ -50,8 +50,8 @@ export class Redis {
   }
 }
 
-// const room = new RoomManager(new Redis());
-// const peer = new PeerConnectionManager(room);
+const room = new RoomManager(new Redis());
+const peer = new PeerConnectionManager();
 
 export class Publish extends Redis {
   constructor() {
@@ -73,8 +73,6 @@ export class Subscribe extends Redis {
     this.io = io;
     this.socket = socket;
     this.pub = new Publish();
-    this.room = new RoomManager(new Redis());
-    this.peer = new PeerConnectionManager();
   }
 
   createPubData = (topic, data) => {
@@ -104,7 +102,7 @@ export class Subscribe extends Redis {
     await this.redisClient.subscribe(channel + "-joinRoom", async (message) => {
       const data = JSON.parse(message);
       try {
-        const allUsers = this.room.getOtherUsersInRoom(data.id, data.roomId);
+        const allUsers = room.getOtherUsersInRoom(data.id, data.roomId);
         await this.sendDataCallback(data.id, { users: allUsers }, "allUsers");
       } catch (error) {
         console.error(error);
@@ -120,13 +118,13 @@ export class Subscribe extends Redis {
       const roomId = data.roomId;
 
       try {
-        this.room.socketToRoom[socketId] = roomId;
+        room.socketToRoom[socketId] = roomId;
         const pc = new wrtc.RTCPeerConnection(config.PC_CONFIG);
   
-        if (this.peer.receiverPCs[socketId]) {
-          this.peer.joinReceiverPC(socketId, pc);
+        if (peer.receiverPCs[socketId]) {
+          peer.joinReceiverPC(socketId, pc);
         } else { 
-          this.peer.joinFirstReceiverPC(socketId, pc);
+          peer.joinFirstReceiverPC(socketId, pc);
         }
 
         pc.setRemoteDescription(data.sdp).then(() => {
@@ -150,14 +148,14 @@ export class Subscribe extends Redis {
         };
 
         pc.ontrack = (e) => {
-          if (this.room.users[roomId]) {
-            if (isIncluded(this.room.users[roomId], socketId))
+          if (room.users[roomId]) {
+            if (isIncluded(room.users[roomId], socketId))
               return;
-            this.room.joinSocketRoomWithMediaStream(roomId, socketId, e.streams[0])
+            room.joinSocketRoomWithMediaStream(roomId, socketId, e.streams[0])
           } else {
-            this.room.joinFirstSocketRoomWithMediaStream(roomId, socketId, e.streams[0], socket.id)
+            room.joinFirstSocketRoomWithMediaStream(roomId, socketId, e.streams[0], socket.id)
           }
-          this.room.users[roomId].forEach (async user => {
+          room.users[roomId].forEach (async user => {
               await this.sendDataCallback(user.id, { id: socketId, roomId: roomId }, "userEnter");
           });
         };
@@ -171,7 +169,7 @@ export class Subscribe extends Redis {
     await this.redisClient.subscribe(channel + "-senderCandidate", async (message, channel) => {
       const data = JSON.parse(message);
       try {
-        let pc = this.peer.receiverPCs[data.senderSocketId];
+        let pc = peer.receiverPCs[data.senderSocketId];
         await pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
       } catch (error) {
         console.error(error);
@@ -189,13 +187,13 @@ export class Subscribe extends Redis {
       try {
         const pc = new wrtc.RTCPeerConnection(config.PC_CONFIG);
 
-        if (this.peer.senderPCs[senderSocketId]) {
-          this.peer.joinSenderPC(senderSocketId, receiverSocketId, pc);
+        if (peer.senderPCs[senderSocketId]) {
+          peer.joinSenderPC(senderSocketId, receiverSocketId, pc);
         } else {
-          this.peer.joinFirstSenderPC(senderSocketId, receiverSocketId, pc);
+          peer.joinFirstSenderPC(senderSocketId, receiverSocketId, pc);
         }
 
-        const sendUser = this.room.getSenderUser(roomId, senderSocketId);
+        const sendUser = room.getSenderUser(roomId, senderSocketId);
         await sendUser.stream.getTracks().forEach((track) => {
           pc.addTrack(track, sendUser.stream);
         });
@@ -219,7 +217,7 @@ export class Subscribe extends Redis {
     await this.redisClient.subscribe(channel + "-receiverCandidate", async (message, channel) => {
       const data = JSON.parse(message);
       try {
-        const senderPC = this.peer.senderPCs[data.senderSocketId].filter((sPC) => sPC.id === data.receiverSocketId)[0];
+        const senderPC = peer.senderPCs[data.senderSocketId].filter((sPC) => sPC.id === data.receiverSocketId)[0];
         await senderPC.pc.addIceCandidate(
           new wrtc.RTCIceCandidate(data.candidate)
         );
@@ -243,20 +241,19 @@ export class Subscribe extends Redis {
   async subscribeDisconnect(channel) {
     await this.redisClient.subscribe(channel + "-disconnect", async (message) => {
       try {
-        console.log(this.room, "room");
-        let roomId = this.room.socketToRoom[channel];
+        let roomId = room.socketToRoom[channel];
 
         if (roomId === null) return;
   
-        this.room.deleteUser(channel, roomId);
-        this.peer.closeReceiverPC(channel);
-        this.peer.closeSenderPCs(channel);
+        room.deleteUser(channel, roomId);
+        peer.closeReceiverPC(channel);
+        peer.closeSenderPCs(channel);
 
-        if (this.room.users[roomId] === undefined) return;
+        if (room.users[roomId] === undefined) return;
 
         console.log("room.users", room.users)
 
-        this.room.users[roomId].forEach (user => {
+        room.users[roomId].forEach (user => {
           this.sendDataCallback(user.id, { id: channel, roomId: roomId }, "userExit");
         });
       } catch (error) {
