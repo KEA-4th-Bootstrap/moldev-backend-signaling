@@ -223,21 +223,23 @@ export class Subscribe extends Redis {
       const senderSocketId = data.senderSocketId;
       const candidate = data.candidate;
 
+      console.log("data", data);
+
       if(receiverSocketId === null || senderSocketId === null || candidate === null || receiverSocketId === undefined || senderSocketId === undefined || candidate === undefined)
         return;
 
       try {
         const senderPC = peer.senderPCs[senderSocketId].filter((sPC) => sPC.id === receiverSocketId)[0];
-        await senderPC.pc.addIceCandidate(
-          new wrtc.RTCIceCandidate(candidate)
-        );
+        await senderPC.pc.addIceCandidate(new wrtc.RTCIceCandidate(candidate));
 
+        console.log("remote onicecandidate start");
         senderPC.onicecandidate = async (e) => {
           await this.sendDataCallback(receiverSocketId, {
             id: senderSocketId,
             candidate: e.candidate
           }, "getReceiverCandidate");
-        }; 
+        };
+        console.log("remote onicecandidate end");
 
         senderPC.oniceconnectionstatechange = (e) => {
           console.log("oniceconnectionstatechange", e);

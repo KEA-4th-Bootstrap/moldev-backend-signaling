@@ -14,7 +14,7 @@ module.exports = {
         credential: process.env.TURN_CREDETIAL,
       },
       {
-        urls: "turn:43.203.19.5:3478?transport=udp",
+        urls: "turn:43.203.19.5:5349?transport=udp",
         username: process.env.TURN_USERNAME,
         credential: process.env.TURN_CREDETIAL,
       },
