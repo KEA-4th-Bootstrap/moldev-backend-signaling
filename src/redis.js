@@ -1,9 +1,10 @@
 import PeerConnectionManager from './peer'
-import RoomManager from './room'
+// import RoomManager from './room'
 import { createClient } from 'redis';
 import config from './config'
 import { isIncluded } from './utils'
 let wrtc = require("wrtc");
+const roomManager = require('./room');
 
 export class Redis {
   constructor() {
@@ -50,7 +51,7 @@ export class Redis {
   }
 }
 
-const room = new RoomManager(new Redis());
+const room = new roomManager(new Redis());
 const peer = new PeerConnectionManager(room);
 
 export class Publish extends Redis {
