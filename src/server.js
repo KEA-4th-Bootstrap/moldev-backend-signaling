@@ -15,6 +15,10 @@ const io = new Server(httpServer, config.CORS_CONFIG);
 const pub = new Publish();
 const redis = new Redis();
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'UP' });
+});
+
 io.on("connection", async (socket) => {
   const sub = new Subscribe(io, socket);
   
