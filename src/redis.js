@@ -199,7 +199,7 @@ export class Subscribe extends Redis {
         });
 
         await pc.setRemoteDescription(data.sdp).then(() => {
-          pc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: true }).then((sdp) => {
+          pc.createAnswer({ offerToReceiveAudio: false, offerToReceiveVideo: false }).then((sdp) => {
             pc.setLocalDescription(sdp).then(() => {
               this.sendDataCallback(receiverSocketId, {id: senderSocketId, sdp}, "getReceiverAnswer");
             })
