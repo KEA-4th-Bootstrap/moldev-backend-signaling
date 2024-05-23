@@ -6,7 +6,6 @@ import config from './config'
 import { Subscribe, Publish, Redis } from './redis'
 
 const app = express();
-app.use(cors());
 app.use("/public", express.static(__dirname + "/public"));
 
 const httpServer = http.createServer(app);
