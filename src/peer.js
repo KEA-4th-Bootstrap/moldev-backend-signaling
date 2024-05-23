@@ -1,8 +1,7 @@
 class PeerConnectionManager {
-  constructor(room) {
+  constructor() {
       this.receiverPCs = {};
       this.senderPCs = {};
-      this.room = room;
   }
 
   joinFirstReceiverPC(socketId, pc) {

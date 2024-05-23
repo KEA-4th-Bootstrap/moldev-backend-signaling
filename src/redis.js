@@ -1,8 +1,8 @@
-import PeerConnectionManager from './peer'
-import RoomManager from './room'
+import PeerConnectionManager from './peer';
+import RoomManager from './room';
 import { createClient } from 'redis';
-import config from './config'
-import { isIncluded } from './utils'
+import config from './config';
+import { isIncluded } from './utils';
 let wrtc = require("wrtc");
 
 export class Redis {
@@ -243,6 +243,7 @@ export class Subscribe extends Redis {
   async subscribeDisconnect(channel) {
     await this.redisClient.subscribe(channel + "-disconnect", async (message) => {
       try {
+        console.log(this.room, "room");
         let roomId = this.room.socketToRoom[channel];
 
         if (roomId === null) return;
