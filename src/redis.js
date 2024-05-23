@@ -170,10 +170,8 @@ export class Subscribe extends Redis {
       const data = JSON.parse(message);
       try {
         let pc = peer.receiverPCs[data.senderSocketId];
-        await new wrtc.RTCIceCandidate(data.candidate).then((iceCandidate) => {
-          console.log("sender candidate", iceCandidate)
-          pc.addIceCandidate(iceCandidate);
-        })
+        console.log("sender candidate", new wrtc.RTCIceCandidate(data.candidate));
+        await pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
       } catch (error) {
         console.error(error);
       }
@@ -233,10 +231,8 @@ export class Subscribe extends Redis {
 
       try {
         const senderPC = peer.senderPCs[senderSocketId].filter((sPC) => sPC.id === receiverSocketId)[0];
-        await new wrtc.RTCIceCandidate(candidate).then((iceCandidate) => {
-          console.log("candidate", candidate);
-          senderPC.pc.addIceCandidate(iceCandidate);
-        })
+        console.log(new wrtc.RTCIceCandidate(candidate));
+        await senderPC.pc.addIceCandidate(new wrtc.RTCIceCandidate(candidate));
 
         console.log("remote onicecandidate start");
         senderPC.onicecandidate = async (e) => {
