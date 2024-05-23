@@ -74,7 +74,7 @@ export class Subscribe extends Redis {
     this.socket = socket;
     this.pub = new Publish();
     this.room = new RoomManager(new Redis());
-    this.peer = new PeerConnectionManager(this.oom);
+    this.peer = new PeerConnectionManager();
   }
 
   createPubData = (topic, data) => {
