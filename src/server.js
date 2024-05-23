@@ -20,6 +20,7 @@ app.get('/health', (req, res) => {
 });
 
 io.on("connection", async (socket) => {
+  console.log(socket)
   const sub = new Subscribe(io, socket);
   
   socket.on("joinRoom", async (data) => {
