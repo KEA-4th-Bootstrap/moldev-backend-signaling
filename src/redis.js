@@ -184,6 +184,9 @@ export class Subscribe extends Redis {
       const senderSocketId = data.senderSocketId;
       const roomId = data.roomId;
 
+      if(receiverSocketId === null || senderSocketId === null || roomId === null || receiverSocketId === undefined || senderSocketId === undefined || roomId === undefined)
+        return;
+
       try {
         const pc = new wrtc.RTCPeerConnection(config.PC_CONFIG);
 
@@ -216,10 +219,17 @@ export class Subscribe extends Redis {
   async subscribeReceiverCandidate(channel) {
     await this.redisClient.subscribe(channel + "-receiverCandidate", async (message, channel) => {
       const data = JSON.parse(message);
+      const receiverSocketId = data.receiverSocketId;
+      const senderSocketId = data.senderSocketId;
+      const candidate = data.candidate;
+
+      if(receiverSocketId === null || senderSocketId === null || candidate === null || receiverSocketId === undefined || senderSocketId === undefined || candidate === undefined)
+        return;
+
       try {
-        const senderPC = peer.senderPCs[data.senderSocketId].filter((sPC) => sPC.id === data.receiverSocketId)[0];
+        const senderPC = peer.senderPCs[senderSocketId].filter((sPC) => sPC.id === receiverSocketId)[0];
         await senderPC.pc.addIceCandidate(
-          new wrtc.RTCIceCandidate(data.candidate)
+          new wrtc.RTCIceCandidate(candidate)
         );
 
         senderPC.onicecandidate = async (e) => {
