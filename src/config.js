@@ -8,9 +8,8 @@ module.exports = {
       {
           urls: process.env.STUN_URL,
       },
-
       {
-        urls: process.env.TURN_URL,
+        urls: "turn:43.203.19.5:3478",
         username: process.env.TURN_USERNAME,
         credential: process.env.TURN_CREDETIAL,
       },

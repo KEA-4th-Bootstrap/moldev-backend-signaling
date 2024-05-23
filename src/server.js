@@ -1,7 +1,6 @@
 import http from 'http'
 import { Server } from "socket.io";
 import express from 'express'
-import cors from 'cors'
 import config from './config'
 import { Subscribe, Publish, Redis } from './redis'
 
