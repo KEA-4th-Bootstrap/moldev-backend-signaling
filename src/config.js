@@ -23,7 +23,7 @@ module.exports = {
   SOCKET_SERVER_URL: process.env.SOCKET_SERVER_URL,
   CORS_CONFIG: {
     cors: {
-        origin: [process.env.CLIENT_URL],
+        origin: [process.env.CLIENT_URL, "https://web.moldev.site"],
         methods: ["GET", "POST"],
         transports: ['websocket', 'polling'],
         credentials: true                 
