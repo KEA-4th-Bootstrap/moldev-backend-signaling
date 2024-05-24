@@ -229,7 +229,7 @@ export class Subscribe extends Redis {
 
       try {
         const senderPC = peer.senderPCs[senderSocketId].filter((sPC) => sPC.id === receiverSocketId)[0];
-        await senderPC.pc.addIceCandidate(new wrtc.RTCIceCandidate(candidate));
+        senderPC.pc.addIceCandidate(new wrtc.RTCIceCandidate(candidate));
 
         senderPC.onicecandidate = async (e) => {
           console.log("remote onicecandidate ing");
