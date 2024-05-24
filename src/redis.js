@@ -127,7 +127,7 @@ export class Subscribe extends Redis {
           peer.joinFirstReceiverPC(socketId, pc);
         }
 
-        console.log(peer.receiverPCs)
+        console.log("receiverPCs", peer.receiverPCs)
 
         pc.setRemoteDescription(data.sdp).then(() => {
           pc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: true}).then((sdp) => {
@@ -142,11 +142,11 @@ export class Subscribe extends Redis {
         };
 
         pc.onicegatheringstatechange = (e) => {
-          console.log("Ice gathering:" + JSON.stringify(e));
+          // console.log("Ice gathering:" + JSON.stringify(e));
         };
 
         pc.oniceconnectionstatechange = (e) => {
-          console.log("oniceconnectionstatechange", e);
+          // console.log("oniceconnectionstatechange", e);
         };
 
         pc.ontrack = (e) => {
@@ -172,7 +172,6 @@ export class Subscribe extends Redis {
       const data = JSON.parse(message);
       try {
         let pc = peer.receiverPCs[data.senderSocketId];
-        console.log("sender candidate", new wrtc.RTCIceCandidate(data.candidate));
         await pc.addIceCandidate(new wrtc.RTCIceCandidate(data.candidate));
       } catch (error) {
         console.error(error);
@@ -213,12 +212,11 @@ export class Subscribe extends Redis {
         });
         
         pc.onicecandidate = (e) => {
-          console.log("remote onicecandidate ing");
           this.sendDataCallback(receiverSocketId, {id: senderSocketId, candidate: e.candidate}, "getReceiverCandidate");
         };
 
         pc.oniceconnectionstatechange = (e) => {
-          console.log("oniceconnectionstatechange", e);
+          // console.log("oniceconnectionstatechange", e);
         };
 
       } catch (error) {
@@ -277,7 +275,7 @@ export class Subscribe extends Redis {
 
         if (room.users[roomId] === undefined) return;
 
-        console.log("room.users", room.users)
+        // console.log("room.users", room.users)
 
         room.users[roomId].forEach (user => {
           this.sendDataCallback(user.id, { id: channel, roomId: roomId }, "userExit");
