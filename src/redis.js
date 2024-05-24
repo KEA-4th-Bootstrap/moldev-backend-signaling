@@ -127,6 +127,8 @@ export class Subscribe extends Redis {
           peer.joinFirstReceiverPC(socketId, pc);
         }
 
+        console.log(peer.receiverPCs)
+
         pc.setRemoteDescription(data.sdp).then(() => {
           pc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: true}).then((sdp) => {
             pc.setLocalDescription(sdp).then(() => {
@@ -202,13 +204,22 @@ export class Subscribe extends Redis {
           pc.addTrack(track, sendUser.stream);
         });
 
-        await pc.setRemoteDescription(data.sdp).then(() => {
+        pc.setRemoteDescription(data.sdp).then(() => {
           pc.createAnswer({ offerToReceiveAudio: false, offerToReceiveVideo: false }).then((sdp) => {
             pc.setLocalDescription(sdp).then(() => {
               this.sendDataCallback(receiverSocketId, {id: senderSocketId, sdp}, "getReceiverAnswer");
             })
           })
         });
+        
+        pc.onicecandidate = (e) => {
+          console.log("remote onicecandidate ing");
+          this.sendDataCallback(receiverSocketId, {id: senderSocketId, candidate: e.candidate}, "getReceiverCandidate");
+        };
+
+        pc.oniceconnectionstatechange = (e) => {
+          console.log("oniceconnectionstatechange", e);
+        };
 
       } catch (error) {
         console.error(error);
@@ -216,9 +227,8 @@ export class Subscribe extends Redis {
     });
   }
 
-
   async subscribeReceiverCandidate(channel) {
-    await this.redisClient.subscribe(channel + "-receiverCandidate", async (message, channel) => {
+    await this.redisClient.subscribe(channel + "-receiverCandidate", async (message) => {
       const data = JSON.parse(message);
       const receiverSocketId = data.receiverSocketId;
       const senderSocketId = data.senderSocketId;
@@ -228,21 +238,8 @@ export class Subscribe extends Redis {
         return;
 
       try {
-        const senderPC = peer.senderPCs[senderSocketId].filter((sPC) => sPC.id === receiverSocketId)[0];
-        // const newCandidate = new wrtc.RTCIceCandidate(candidate);
-        await senderPC.pc.addIceCandidate(new wrtc.RTCIceCandidate(candidate));
-
-        senderPC.onicecandidate = (e) => {
-          console.log("remote onicecandidate ing");
-          this.sendDataCallback(receiverSocketId, {
-            id: senderSocketId,
-            candidate: e.candidate
-          }, "getReceiverCandidate");
-        };
-
-        senderPC.oniceconnectionstatechange = (e) => {
-          console.log("oniceconnectionstatechange", e);
-        };
+        const senderPC = peer.senderPCs[senderSocketId].filter((sPC) => sPC.id === receiverSocketId);
+        await senderPC[0].pc.addIceCandidate(new wrtc.RTCIceCandidate(candidate));
       } catch (error) {
         console.error(error);
       }
