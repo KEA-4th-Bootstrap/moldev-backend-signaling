@@ -50,6 +50,12 @@ io.on("connection", async (socket) => {
     pub.publish((hostId === null ? socket.id : hostId) + "-receiverCandidate", JSON.stringify(data));
   });
 
+  socket.on("broadcastCursor", async (data) => {
+    const hostId = await redis.getAsync(`room:${data.roomId}`);
+    console.log("broadcastCursor", data.roomId);
+    pub.publish((hostId === null ? socket.id : hostId) + "-broadcastCursor", JSON.stringify(data));
+  });
+
   socket.on("quitRoom", async (data) => {
     const hostId = await redis.getAsync(`room:${data.roomId}`);
     console.log("quitRoom", data.roomId);

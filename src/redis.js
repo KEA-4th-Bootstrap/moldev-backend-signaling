@@ -62,7 +62,7 @@ export class Publish extends Redis {
     try {
       await this.redisClient.publish(channel, message);
     } catch(e) {
-
+      console.log(e);
     }
   }
 }
@@ -224,8 +224,6 @@ export class Subscribe extends Redis {
       const senderSocketId = data.senderSocketId;
       const candidate = data.candidate;
 
-      console.log("data", data);
-
       if(receiverSocketId === null || senderSocketId === null || candidate === null || receiverSocketId === undefined || senderSocketId === undefined || candidate === undefined)
         return;
 
@@ -234,7 +232,6 @@ export class Subscribe extends Redis {
         console.log(new wrtc.RTCIceCandidate(candidate));
         await senderPC.pc.addIceCandidate(new wrtc.RTCIceCandidate(candidate));
 
-        console.log("remote onicecandidate start");
         senderPC.onicecandidate = async (e) => {
           console.log("remote onicecandidate ing");
           await this.sendDataCallback(receiverSocketId, {
@@ -242,7 +239,6 @@ export class Subscribe extends Redis {
             candidate: e.candidate
           }, "getReceiverCandidate");
         };
-        console.log("remote onicecandidate end");
 
         senderPC.oniceconnectionstatechange = (e) => {
           console.log("oniceconnectionstatechange", e);
@@ -251,6 +247,24 @@ export class Subscribe extends Redis {
         console.error(error);
       }
     });
+  }
+
+  async subscribeBroadcastCursor(channel) {
+    await this.redisClient.subscribe(channel + "-broadcastCursor", async (message) => {
+      const data = JSON.parse(message);
+      const roomId = data.roomId;
+      const name = data.name;
+      const x = data.x;
+      const y = data.y;
+
+      try {
+        room.users[roomId].forEach (user => {
+          this.sendDataCallback(user.id, { name: name, x: x, y: y }, "broadcastCursor");
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    })
   }
 
   async subscribeDisconnect(channel) {
