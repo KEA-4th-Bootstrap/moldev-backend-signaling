@@ -128,6 +128,7 @@ export class Subscribe extends Redis {
         }
 
         console.log("receiverPCs", peer.receiverPCs)
+        console.log("sdp", data.sdp)
 
         pc.setRemoteDescription(data.sdp).then(() => {
           pc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: true}).then((sdp) => {
