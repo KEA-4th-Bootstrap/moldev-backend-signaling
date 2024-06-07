@@ -237,6 +237,7 @@ export class Subscribe extends Redis {
         return;
 
       try {
+        console.log("sender candidate logs", senderSocketId, peer.senderPCs)
         const senderPC = peer.senderPCs[senderSocketId].filter((sPC) => sPC.id === receiverSocketId);
         await senderPC[0].pc.addIceCandidate(new wrtc.RTCIceCandidate(candidate));
       } catch (error) {
