@@ -128,7 +128,6 @@ export class Subscribe extends Redis {
         }
 
         console.log("receiverPCs", peer.receiverPCs)
-        console.log("sdp", data.sdp)
 
         pc.setRemoteDescription(data.sdp).then(() => {
           pc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: true}).then((sdp) => {
@@ -193,6 +192,7 @@ export class Subscribe extends Redis {
       try {
         const pc = new wrtc.RTCPeerConnection(config.PC_CONFIG);
 
+        console.log("receiverOffer::senderPCs", peer.senderPCs, "::", senderSocketId)
         if (peer.senderPCs[senderSocketId]) {
           peer.joinSenderPC(senderSocketId, receiverSocketId, pc);
         } else {
